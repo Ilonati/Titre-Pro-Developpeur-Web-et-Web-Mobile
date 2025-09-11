@@ -1,0 +1,23 @@
+{
+  "name": "Titre Pro",
+  "version": "1.0.0",
+  "description": " Projet : Gestion des missions et des candidatures",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": " "
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.5",
+    "nodemon": "^3.1.10"
+  }
+}
