@@ -5,11 +5,12 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app"
   },
   "repository": {
     "type": "git",
-    "url": " "
+    "url": "https://github.com/Ilonati/Titre-Pro-Developpeur-Web-et-Web-Mobile.git"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

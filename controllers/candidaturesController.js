@@ -1,76 +1,77 @@
+
 const db = require('../db');
-const fs = require('fs');
-const path = require('path');
 
-// Путь для хранения резюме
-const uploadFolder = path.join(__dirname, '..', 'uploads');
+exports.applyToMission = async (req, res) => {
+    try {
+        if (req.user.role !== 'volunteer') {
+            return res.status(403).json({ message: 'Seuls les bénévoles peuvent postuler' });
+        }
 
-// Создаём папку, если её нет
-if (!fs.existsSync(uploadFolder)) {
-    fs.mkdirSync(uploadFolder);
-}
+        const { mission_id } = req.params;
 
-// Подать заявку с загрузкой файла
-const applyToMission = (req, res) => {
-    if (req.user.role !== 'volunteer') return res.status(403).json({ message: 'Forbidden' });
+        await db.execute(
+            'INSERT INTO candidatures (mission_id, volunteer_id) VALUES (?, ?)',
+            [mission_id, req.user.user_id]
+        );
 
-    const mission_id = req.params.mission_id;
-    let resumePath = null;
-
-    if (req.file) {
-        resumePath = path.join('uploads', req.file.filename);
+        res.status(201).json({ message: 'Candidature envoyée' });
+    } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ message: 'Vous avez déjà postulé à cette mission' });
+        }
+        res.status(500).json({ error: err.message });
     }
-
-    db.query(
-        'INSERT INTO candidatures (mission_id, volunteer_id) VALUES (?, ?)',
-        [mission_id, req.user.user_id],
-        (err) => {
-            if (err) return res.status(400).json({ error: 'Already applied or invalid mission' });
-            res.json({ message: 'Application submitted', resumePath });
-        }
-    );
 };
 
-// Обновление статуса заявки (для ассоциации)
-const updateApplicationStatus = (req, res) => {
-    if (req.user.role !== 'association') return res.status(403).json({ message: 'Forbidden' });
-
-    const { status } = req.body;
-    const candidature_id = req.params.id;
-
-    db.query(
-        `UPDATE candidatures c
-     JOIN missions m ON c.mission_id = m.id
-     SET c.status = ?
-     WHERE c.id = ? AND m.association_id = ?`,
-        [status, candidature_id, req.user.user_id],
-        (err, result) => {
-            if (err) return res.status(500).json({ error: err });
-            if (result.affectedRows === 0) return res.status(403).json({ message: 'Not allowed' });
-            res.json({ message: 'Status updated' });
+exports.getCandidatures = async (req, res) => {
+    try {
+        if (req.user.role !== 'association') {
+            return res.status(403).json({ message: 'Seules les associations peuvent voir les candidatures' });
         }
-    );
-};
 
-// Получить заявки для миссии (ассоциация)
-const getCandidaturesByMission = (req, res) => {
-    if (req.user.role !== 'association') {
-        return res.status(403).json({ message: 'Only associations can view applications' });
+        const { mission_id } = req.params;
+
+        const [rows] = await db.execute(
+            `SELECT candidatures.*, users.name as volunteer_name, users.email as volunteer_email
+       FROM candidatures
+       JOIN users ON candidatures.volunteer_id = users.id
+       WHERE mission_id = ?`,
+            [mission_id]
+        );
+
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    const { mission_id } = req.params;
-
-    db.query(
-        `SELECT c.id, c.status, c.applied_at, u.name AS volunteer_name, u.email, c.mission_id
-     FROM candidatures c
-     JOIN users u ON c.volunteer_id = u.id
-     WHERE c.mission_id = ?`,
-        [mission_id],
-        (err, results) => {
-            if (err) return res.status(500).json({ error: err });
-            res.json(results);
-        }
-    );
 };
 
-module.exports = { applyToMission, updateApplicationStatus, getCandidaturesByMission };
+exports.updateApplicationStatus = async (req, res) => {
+    try {
+        if (req.user.role !== 'association') {
+            return res.status(403).json({ message: 'Seules les associations peuvent modifier le statut' });
+        }
+
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['acceptee', 'refusee'].includes(status)) {
+            return res.status(400).json({ message: 'Statut invalide' });
+        }
+
+        const [result] = await db.execute(
+            'UPDATE candidatures SET status=? WHERE id=?',
+            [status, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Candidature non trouvée' });
+        }
+
+        res.json({ message: `Candidature ${status}` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
+
