@@ -43,7 +43,7 @@ users — table des utilisateurs (bénévoles et comptes association)
 associations_profiles — informations supplémentaires pour les comptes association (optionnel)
 missions — les missions publiées par une association
 candidatures — candidature d'un bénévole à une mission.
-
+```
 Structure du projet
 /project
 │
@@ -63,7 +63,7 @@ Structure du projet
 │
 └─ middleware/              # Middleware для проверки JWT
     └─ auth.js
-
+```
  API
  GET http://localhost:3000/auth/users поиск все пользователей 
  POST http://localhost:3000/auth/register п зарегистрировать пользователя 
