@@ -65,7 +65,7 @@ Structure du projet
     └─ auth.js
 ```
  API
- GET http://localhost:3000/auth/users поиск все пользователей 
+ ```GET http://localhost:3000/auth/users поиск все пользователей 
  POST http://localhost:3000/auth/register п зарегистрировать пользователя 
 {
   "name": "Orange",
@@ -176,7 +176,7 @@ ou
 DELETE  http://localhost:3000/missions/3
 
 Authorization: Bearer association_token
-
+```
 
 Посмотреть всех пользователей
 SELECT m.id, m.title, m.description, m.mission_date, m.created_at, u.name AS association_name
