@@ -47,26 +47,27 @@ candidatures — candidature d'un bénévole à une mission.
 Structure du projet
 /project
 │
-├─ app.js                 # Основной файл сервера
-├─ db.js                    # Подключение к базе данных
-├─ .env                     # Конфиденциальные данные (пароли, секреты)
+├─ app.js                
+├─ db.js                    
+├─ .env                    
 │
-├─ routes/                  # Роутеры (маршруты API)
+├─ routes/                 
 │   ├─ auth.js
 │   ├─ missions.js
 │   └─ candidatures.js
 │
-├─ controllers/             # Логика для каждого маршрута
+├─ controllers/             
 │   ├─ authController.js
 │   ├─ missionsController.js
 │   └─ candidaturesController.js
 │
-└─ middleware/              # Middleware для проверки JWT
+└─ middleware/             
     └─ auth.js
 ```
  API
- ```GET http://localhost:3000/auth/users поиск все пользователей 
- POST http://localhost:3000/auth/register п зарегистрировать пользователя 
+ ```GET http://localhost:3000/auth/users 
+
+ POST http://localhost:3000/auth/register  
 {
   "name": "Orange",
   "email": "assorange@example.com",
@@ -80,17 +81,14 @@ Structure du projet
   "role": "volunteer"
 }
 
-POST http://localhost:3000/auth/login логин  пользователя 
+POST http://localhost:3000/auth/login 
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZSI6InZvbHVudGVlciIsImlhdCI6MTc1Nzg3NDA4MiwiZXhwIjoxNzU3ODc3NjgyfQ.BcF9lUso01MGiy-DaZJOWOTiFtYi5BvDh_45jCIT_-o"
-} токен волонтер
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwicm9sZSI6ImFzc29jaWF0aW9uIiwiaWF0IjoxNzU3ODc0MTg3LCJleHAiOjE3NTc4Nzc3ODd9.Pr5DKmmNfHTRUMgAM9ga3seWYMpXZuWRkxFJWOswhIo"
-} токен ассоциации 
-Создание миссии
+} 
+ 
  Key Authorization   value  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwicm9sZSI6ImFzc29jaWF0aW9uIiwiaWF0IjoxNzU3ODc0MTg3LCJleHAiOjE3NTc4Nzc3ODd9.Pr5DKmmNfHTRUMgAM9ga3seWYMpXZuWRkxFJWOswhIo токен 
 
-добавляем боди тоже 
+
 {
   "title": "  ",
   "description": "  ",
@@ -98,12 +96,12 @@ POST http://localhost:3000/auth/login логин  пользователя
 }
 
 
-ответ {
+ {
   "message": "Mission créée",
   "missionId": 3
 }
 
-GET http://localhost:3000/missions просмотр всех  миссий 
+GET http://localhost:3000/missions 
 [
   {
     "id": 1,
@@ -139,15 +137,10 @@ GET http://localhost:3000/missions просмотр всех  миссий
 Волонтёр подаёт заявку
 POST http://localhost:3000/candidatures/3/apply
 
- Key Authorization   value  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZSI6InZvbHVudGVlciIsImlhdCI6MTc1Nzg3NDA4MiwiZXhwIjoxNzU3ODc3NjgyfQ.BcF9lUso01MGiy-DaZJOWOTiFtYi5BvDh_45jCIT_-o токен 
-без боди 
-
-
-
-Ассоциация смотрит заявки на миссию
+ Key Authorization   value  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZSI6InZvbHVudGVlciIsImlhdCI6MTc1Nzg3NDA4MiwiZXhwIjoxNzU3ODc3NjgyfQ.BcF9lUso01MGiy-DaZJOWOTiFtYi5BvDh_45jCIT_-o 
 
 GET http://localhost:3000/candidatures/3 
-ответ 
+
 [
   {
     "id": 5,
@@ -160,7 +153,6 @@ GET http://localhost:3000/candidatures/3
   }
 ]
 
-Ассоциация принимает заявку
 PATCH http://localhost:3000/candidatures/3
 
 Authorization: Bearer association_token
@@ -172,30 +164,27 @@ ou
 {
   "status": "refusee"
 }
-удаление миссии 
+
 DELETE  http://localhost:3000/missions/3
 
 Authorization: Bearer association_token
 ```
 
-Посмотреть всех пользователей
 SELECT m.id, m.title, m.description, m.mission_date, m.created_at, u.name AS association_name
 FROM missions m
 JOIN users u ON m.association_id = u.id;
 
-Посмотреть все заявки (candidatures)
+ (candidatures)
 SELECT c.id, c.mission_id, c.volunteer_id, c.status, c.applied_at, 
        u.name AS volunteer_name, u.email AS volunteer_email
 FROM candidatures c
 JOIN users u ON c.volunteer_id = u.id;
 
-Проверить заявки по конкретной миссии
 SELECT c.id, c.status, u.name AS volunteer_name
 FROM candidatures c
 JOIN users u ON c.volunteer_id = u.id
 WHERE c.mission_id = 1;
 
-Посмотреть заявки конкретного волонтера
 SELECT c.id, c.status, m.title AS mission_title
 FROM candidatures c
 JOIN missions m ON c.mission_id = m.id
